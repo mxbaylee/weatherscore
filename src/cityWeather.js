@@ -6,10 +6,17 @@ const daytimeHourEnd = 20
 
 export class CityWeather {
   constructor ({ latitude, longitude, tz}) {
-    if (!['pt', 'mt', 'ct', 'et'].includes(tz)) {
+    if (!['pt', 'mt', 'ct', 'et', 'at', 'ht'].includes(tz)) {
       throw Error('TZ not found: ' + tz)
     }
-    this.tzoffset = { pt: -8, mt: -7, ct: -6, et: -5 }[tz]
+    this.tzoffset = {
+      pt: -8,
+      mt: -7,
+      ct: -6,
+      et: -5,
+      at: -9,
+      ht: -10,
+    }[tz]
     this.weather = new WeatherData({
       latitude: latitude,
       longitude: longitude,
@@ -17,7 +24,9 @@ export class CityWeather {
         pt: "America/Los_Angeles",
         mt: "America/Denver",
         ct: "America/Chicago",
-        et: "America/New_York"
+        et: "America/New_York",
+        at: "America/Anchorage",
+        ht: "Pacific/Honolulu",
       }[tz]
     })
   }
