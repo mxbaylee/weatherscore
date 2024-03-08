@@ -26,3 +26,7 @@ Return Values: `0` to `100`, where 100 has a lot of sunshine.
 ## 🌡️ Avg Temp
 
 Returns the average daily temperature of all daily temperatures in fahrenheit.
+
+## 🔋 Credits
+
+🔌 Powered by [Open Metro](https://open-meteo.com/en/docs/historical-weather-api)
