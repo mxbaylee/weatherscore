@@ -30,4 +30,4 @@ percentile). All temperatures are in fahrenheit.
 
 ## 🔋 Credits
 
-🔌 Powered by [Open Metro](https://open-meteo.com/en/docs/historical-weather-api)
+🔌 Powered by [Open Meteo](https://open-meteo.com/en/docs/historical-weather-api)
