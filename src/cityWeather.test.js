@@ -13,6 +13,15 @@ describe('CityWeather', () => {
     })
   })
 
+  describe('stdevTemp', () => {
+    it('calculates stdev of a few temps', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      cityWeather.weather.dailyMeanTemp = vi.fn().mockReturnValue([15, 20, 25])
+      const stdevTemp = await cityWeather.stdevTemp()
+      expect(stdevTemp).toEqual(5)
+    })
+  })
+
   describe('avgTemp', () => {
     it('calculates average temperature ignoring invalid values', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })

@@ -9,6 +9,20 @@ export class CityWeather {
     })
   }
 
+  async stdevTemp () {
+    await this.weather.fetch()
+    const temps = this.weather.dailyMeanTemp().filter((num) => {
+      return !Number.isNaN(num)
+    })
+    const avg = temps.reduce((total, temp) => {
+      return total + temp
+    }, 0) / temps.length
+    const variance = temps.reduce((acc, temp) => {
+      return acc + Math.pow(temp - avg, 2)
+    }, 0) / (temps.length - 1)
+    return Math.sqrt(variance)
+  }
+
   async highTemp () {
     await this.weather.fetch()
     const temps = this.weather.dailyMeanTemp().filter((num) => {
