@@ -4,7 +4,7 @@ const pdx = new CityWeather({
   city: 'Portland',
   state: 'OR',
   latitude: 45.523,
-  longitude: 122.676,
+  longitude: -122.676,
   tz: 'pt',
 })
 

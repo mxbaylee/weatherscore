@@ -68,33 +68,3 @@ export class CityWeather {
     return hour >= daytimeHourStart && hour < daytimeHourEnd
   }
 }
-
-/*
-const pdx = new CityWeather({
-  city: 'Portland',
-  state: 'OR',
-  latitude: 45.523,
-  longitude: 122.676,
-  tz: 'pt',
-})
-
-console.log(await pdx.overcastScore())
-
-const weatherData = {
-  hourly: {
-    time: timeSeries.map((time, idx) => {
-      return new Date((time + utcOffsetSeconds) * 1000)
-    }).length,
-    cloudCover: hourly.variables(0).valuesArray().length,
-  },
-  daily: {
-    temperature2mMax: daily.variables(0).valuesArray(),
-    temperature2mMin: daily.variables(1).valuesArray(),
-    temperature2mMean: daily.variables(2).valuesArray(),
-    daylightDurationS: daily.variables(3).valuesArray(),
-    sunlightDurationS: daily.variables(4).valuesArray(),
-  },
-}
-
-console.log(weatherData)
-*/
