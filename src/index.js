@@ -1,4 +1,5 @@
 import { CityWeather } from './cityWeather.js'
+import { spawn } from 'child_process'
 
 const args = process.argv.slice(2)
 const latitude = parseFloat(args[0]) || 45.523
@@ -11,6 +12,18 @@ const city = new CityWeather({
   tz,
 })
 
-console.log('Overcast Score', await city.overcastScore())
-console.log('Avg Temp', await city.avgTemp())
-console.log('Sunshine Score', await city.sunshineScore())
+const avgTemp = await city.avgTemp()
+const overcastScore = await city.overcastScore()
+const sunshineScore = await city.sunshineScore()
+
+console.log('Avg Temp', avgTemp)
+console.log('Overcast Score', overcastScore)
+console.log('Sunshine Score', sunshineScore)
+
+function pbcopy (data) {
+  const proc = spawn('pbcopy')
+  proc.stdin.write(data)
+  proc.stdin.end()
+}
+
+pbcopy(`${avgTemp}\t${overcastScore}\t${sunshineScore}`);

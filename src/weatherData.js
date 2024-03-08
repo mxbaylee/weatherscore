@@ -10,7 +10,7 @@ export class WeatherData {
       "latitude": latitude,
       "longitude": longitude,
       "timezone": timezone,
-      "start_date": "2024-03-04",
+      "start_date": "2014-03-04",
       "end_date": "2024-03-05",
       "hourly": ["cloud_cover"],
       "daily": ["temperature_2m_mean", "daylight_duration", "sunshine_duration"],
