@@ -1,4 +1,5 @@
 import { WeatherData } from './weatherData.js'
+import percentile from 'percentile'
 
 export class CityWeather {
   constructor ({ latitude, longitude }) {
@@ -6,6 +7,22 @@ export class CityWeather {
       latitude: latitude,
       longitude: longitude,
     })
+  }
+
+  async highTemp () {
+    await this.weather.fetch()
+    const temps = this.weather.dailyMeanTemp().filter((num) => {
+      return !Number.isNaN(num)
+    })
+    return percentile(90, temps)
+  }
+
+  async lowTemp () {
+    await this.weather.fetch()
+    const temps = this.weather.dailyMeanTemp().filter((num) => {
+      return !Number.isNaN(num)
+    })
+    return percentile(10, temps)
   }
 
   async avgTemp () {

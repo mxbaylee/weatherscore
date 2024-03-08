@@ -23,9 +23,10 @@ multiple days, with a higher score indicating more sunshine hours.
 
 Return Values: `0` to `100`, where 100 has a lot of sunshine.
 
-## 🌡️ Avg Temp
+## 🌡️ Temp's
 
-Returns the average daily temperature of all daily temperatures in fahrenheit.
+Has API for average daily temperature, as well as high (90th percentile) and low (10th
+percentile). All temperatures are in fahrenheit.
 
 ## 🔋 Credits
 
