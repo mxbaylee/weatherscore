@@ -1,5 +1,6 @@
 import { WeatherData } from './weatherData.js'
 
+// 12 hours
 const totalDaytimeMinutes = 7200
 const daytimeHourStart = 8
 const daytimeHourEnd = 20
