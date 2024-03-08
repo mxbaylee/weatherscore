@@ -1,48 +1,11 @@
 import { WeatherData } from './weatherData.js'
 
-// 12 hours
-const totalDaytimeMinutes = 7200
-const daytimeHourStart = 8
-const daytimeHourEnd = 20
-
 export class CityWeather {
-  constructor ({ latitude, longitude, tz}) {
-    if (!['pt', 'mt', 'ct', 'et', 'at', 'ht'].includes(tz)) {
-      throw Error('TZ not found: ' + tz)
-    }
-    this.tzoffset = {
-      pt: -8,
-      mt: -7,
-      ct: -6,
-      et: -5,
-      at: -9,
-      ht: -10,
-    }[tz]
+  constructor ({ latitude, longitude }) {
     this.weather = new WeatherData({
       latitude: latitude,
       longitude: longitude,
-      timezone: {
-        pt: "America/Los_Angeles",
-        mt: "America/Denver",
-        ct: "America/Chicago",
-        et: "America/New_York",
-        at: "America/Anchorage",
-        ht: "Pacific/Honolulu",
-      }[tz]
     })
-  }
-
-  async overcastScore () {
-    await this.weather.fetch()
-    const cloudCover = this.weather.hourlyCloudCover()
-    const sumDaytimeOvercastMinutes = this.weather.timeSeries().reduce((sumDaytimeOvercastMinutes, time, idx) => {
-      if (this.isDaytime(time)) {
-        const cloudCoverMinutes = ((cloudCover[idx] || 0) / 100) * 60
-        sumDaytimeOvercastMinutes += cloudCoverMinutes
-      }
-      return sumDaytimeOvercastMinutes
-    }, 0)
-    return (sumDaytimeOvercastMinutes / this.weather.totalDays() / totalDaytimeMinutes) * 1000
   }
 
   async avgTemp () {
@@ -53,6 +16,11 @@ export class CityWeather {
     return temps.reduce((total, temp) => {
       return total + temp
     }, 0) / temps.length
+  }
+
+  async overcastScore() {
+    const sunshineScore = await this.sunshineScore()
+    return 100 - sunshineScore
   }
 
   async sunshineScore () {
@@ -69,12 +37,5 @@ export class CityWeather {
       const sunshineIndex = daylight === 0 ? 0 : (sunDuration / daylight) * 100
       return acc + sunshineIndex
     }, 0) / Math.max(1, sunshineDuration.length - ignoreDays)
-  }
-
-  isDaytime (inputDate) {
-    const date = new Date(inputDate.getTime())
-    date.setHours(date.getHours() + this.tzoffset)
-    const hour = date.getHours()
-    return hour >= daytimeHourStart && hour < daytimeHourEnd
   }
 }

@@ -3,16 +3,9 @@
 Creates an overcast and sunshine score for a given lat/lng.
 
 ```
-npm start -- 45.523 -122.676 pt
+npm start -- {lat} {lng}
+npm start -- 45.523 -122.676
 ```
-
-### Format
-
-```
-npm start -- {lat} {lng} {tz}
-```
-
-`tz` - Can be 'pt', 'mt', 'ct', 'et', 'at', 'ht'
 
 ## ☁️ Overcast Score
 
@@ -33,7 +26,3 @@ Return Values: `0` to `100`, where 100 has a lot of sunshine.
 ## 🌡️ Avg Temp
 
 Returns the average daily temperature of all daily temperatures in fahrenheit.
-
-## 🤭 Timezones
-
-Timezone support is limited, with a hand-wavey approach which does effect accuracy.

@@ -7,48 +7,9 @@ vi.mock('./weatherData.js')
 describe('CityWeather', () => {
   // Tests
   describe('constructor', () => {
-    it('throws error for invalid timezone', () => {
-      expect(() => {
-        new CityWeather({ latitude: 10, longitude: 20, tz: 'invalid' })
-      }).toThrowError('TZ not found: invalid')
-    })
-
     it('creates a CityWeather object with valid timezone', () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 })
       expect(cityWeather).toBeDefined()
-      expect(cityWeather.tzoffset).toBe(-8); // Offset for Pacific Time (PT)
-    })
-  })
-
-  describe('overcastScore', () => {
-    it('calculates max overcast score', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' });
-      cityWeather.weather.hourlyCloudCover = vi.fn().mockReturnValue([
-        100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100,
-      ])
-      cityWeather.weather.timeSeries = vi.fn().mockReturnValue([
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-      ])
-      cityWeather.weather.totalDays = vi.fn().mockReturnValue(1)
-      cityWeather.isDaytime = vi.fn().mockReturnValue(true)
-
-      const overcastScore = await cityWeather.overcastScore()
-      expect(overcastScore).toBeCloseTo(100, 1)
-    })
-
-    it('calculates min overcast score', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' });
-      cityWeather.weather.hourlyCloudCover = vi.fn().mockReturnValue([
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ])
-      cityWeather.weather.timeSeries = vi.fn().mockReturnValue([
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-      ])
-      cityWeather.weather.totalDays = vi.fn().mockReturnValue(1)
-      cityWeather.isDaytime = vi.fn().mockReturnValue(true)
-
-      const overcastScore = await cityWeather.overcastScore()
-      expect(overcastScore).toBeCloseTo(0, 1)
     })
   })
 
@@ -68,29 +29,55 @@ describe('CityWeather', () => {
     })
   })
 
-  describe('sunshineScore', () => {
+  describe('overcastScore', () => {
     it('calculates score where sunshine is equal to daylight', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
       cityWeather.weather.dailySunshine = vi.fn().mockReturnValue([7200])
       cityWeather.weather.dailyDaylight = vi.fn().mockReturnValue([7200])
-      const avgTemp = await cityWeather.sunshineScore()
-      expect(avgTemp).toBe(100)
+      const overcastScore = await cityWeather.overcastScore()
+      expect(overcastScore).toBe(0)
     })
 
     it('ignores NaN values', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
       cityWeather.weather.dailySunshine = vi.fn().mockReturnValue([7200, NaN])
       cityWeather.weather.dailyDaylight = vi.fn().mockReturnValue([7200, 200])
-      const avgTemp = await cityWeather.sunshineScore()
-      expect(avgTemp).toBe(100)
+      const overcastScore = await cityWeather.overcastScore()
+      expect(overcastScore).toBe(0)
     })
 
     it('calculates zero score', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
       cityWeather.weather.dailySunshine = vi.fn().mockReturnValue([0, 0])
       cityWeather.weather.dailyDaylight = vi.fn().mockReturnValue([7200, 200])
-      const avgTemp = await cityWeather.sunshineScore()
-      expect(avgTemp).toBe(0)
+      const overcastScore = await cityWeather.overcastScore()
+      expect(overcastScore).toBe(100)
+    })
+  })
+
+  describe('sunshineScore', () => {
+    it('calculates score where sunshine is equal to daylight', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      cityWeather.weather.dailySunshine = vi.fn().mockReturnValue([7200])
+      cityWeather.weather.dailyDaylight = vi.fn().mockReturnValue([7200])
+      const sunshineScore = await cityWeather.sunshineScore()
+      expect(sunshineScore).toBe(100)
+    })
+
+    it('ignores NaN values', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      cityWeather.weather.dailySunshine = vi.fn().mockReturnValue([7200, NaN])
+      cityWeather.weather.dailyDaylight = vi.fn().mockReturnValue([7200, 200])
+      const sunshineScore = await cityWeather.sunshineScore()
+      expect(sunshineScore).toBe(100)
+    })
+
+    it('calculates zero score', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      cityWeather.weather.dailySunshine = vi.fn().mockReturnValue([0, 0])
+      cityWeather.weather.dailyDaylight = vi.fn().mockReturnValue([7200, 200])
+      const sunshineScore = await cityWeather.sunshineScore()
+      expect(sunshineScore).toBe(0)
     })
   })
 })
