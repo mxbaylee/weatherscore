@@ -1,5 +1,5 @@
 import { CityWeather } from './cityWeather.js'
-import { spawn } from 'child_process'
+import { pbcopy } from './util.js'
 
 const args = process.argv.slice(2)
 const latitude = parseFloat(args[0]) || 45.523
@@ -12,6 +12,7 @@ const city = new CityWeather({
   tz,
 })
 
+const airScore = await city.airScore()
 const avgTemp = await city.avgTemp()
 const stdevTemp = await city.stdevTemp()
 const highTemp = await city.highTemp()
@@ -19,17 +20,22 @@ const lowTemp = await city.lowTemp()
 const overcastScore = await city.overcastScore()
 const sunshineScore = await city.sunshineScore()
 
-console.log('Avg Temp', avgTemp)
-console.log('Stdev Temp', stdevTemp)
-console.log('High Temp', highTemp)
-console.log('Low Temp', lowTemp)
-console.log('Overcast Score', overcastScore)
-console.log('Sunshine Score', sunshineScore)
+console.log({
+  overcastScore,
+  sunshineScore,
+  avgTemp,
+  stdevTemp,
+  highTemp,
+  lowTemp,
+  airScore,
+})
 
-function pbcopy (data) {
-  const proc = spawn('pbcopy')
-  proc.stdin.write(data)
-  proc.stdin.end()
-}
-
-pbcopy(`${avgTemp}\t${stdevTemp}\t${highTemp}\t${lowTemp}\t${overcastScore}\t${sunshineScore}`);
+pbcopy([
+  airScore,
+  avgTemp,
+  stdevTemp,
+  highTemp,
+  lowTemp,
+  overcastScore,
+  sunshineScore,
+].join('\t'))
