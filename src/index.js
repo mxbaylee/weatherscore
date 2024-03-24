@@ -13,6 +13,7 @@ const city = new CityWeather({
 })
 
 const airScore = await city.airScore()
+const airScoreStdev = await city.airScoreStdev()
 const avgTemp = await city.avgTemp()
 const stdevTemp = await city.stdevTemp()
 const highTemp = await city.highTemp()
@@ -28,10 +29,12 @@ console.log({
   highTemp,
   lowTemp,
   airScore,
+  airScoreStdev,
 })
 
 pbcopy([
   airScore,
+  airScoreStdev,
   avgTemp,
   stdevTemp,
   highTemp,

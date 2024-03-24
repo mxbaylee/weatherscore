@@ -13,55 +13,37 @@ describe('CityWeather', () => {
     })
   })
 
+  describe('airScoreStdev', () => {
+    it('calculates score for no data', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      cityWeather.airQuality.fetch = vi.fn()
+      cityWeather.airQuality.aqiDailyMax = vi.fn().mockReturnValue([])
+      const airQuality = await cityWeather.airScoreStdev()
+      expect(airQuality).toBeCloseTo(0, 0)
+    })
+    it('calculates average for more values', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
+      cityWeather.airQuality.fetch = vi.fn()
+      cityWeather.airQuality.aqiDailyMax = vi.fn().mockReturnValue([100, 150, 50])
+      const airQuality = await cityWeather.airScoreStdev()
+      expect(airQuality).toEqual(50)
+    })
+  })
+
   describe('airScore', () => {
     it('calculates score for no data', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
       cityWeather.airQuality.fetch = vi.fn()
-      cityWeather.airQuality.aqi = vi.fn().mockReturnValue([])
+      cityWeather.airQuality.aqiDailyMax = vi.fn().mockReturnValue([])
       const airQuality = await cityWeather.airScore()
       expect(airQuality).toEqual(0)
     })
-    it('calculates score for no bad days', async () => {
+    it('calculates average for more values', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
       cityWeather.airQuality.fetch = vi.fn()
-      cityWeather.airQuality.aqi = vi.fn().mockReturnValue([0, 0, 0])
+      cityWeather.airQuality.aqiDailyMax = vi.fn().mockReturnValue([100, 252, 500])
       const airQuality = await cityWeather.airScore()
-      expect(airQuality).toEqual(0)
-    })
-    it('calculates score for max hazard days', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
-      cityWeather.airQuality.fetch = vi.fn()
-      cityWeather.airQuality.aqi = vi.fn().mockReturnValue([500, 500, 500])
-      const airQuality = await cityWeather.airScore()
-      expect(airQuality).toEqual(500)
-    })
-    it('calculates score for mixed bad/worse/hazard in a single day', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
-      cityWeather.airQuality.fetch = vi.fn()
-      cityWeather.airQuality.aqi = vi.fn().mockReturnValue([0, 0, 0, 200, 200, 500, 500, 500])
-      const airQuality = await cityWeather.airScore()
-      expect(airQuality).toEqual(500)
-    })
-    it('calculates score for mixed bad/worse/hazard for multiple days', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
-      cityWeather.airQuality.fetch = vi.fn()
-      cityWeather.airQuality.aqi = vi.fn().mockReturnValue([
-        500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-      ])
-      const airQuality = await cityWeather.airScore()
-      expect(airQuality).toEqual(375)
-    })
-    it('calculates score for mixed bad/worse/hazard for multiple days with missing days', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20, tz: 'pt' })
-      cityWeather.airQuality.fetch = vi.fn()
-      cityWeather.airQuality.aqi = vi.fn().mockReturnValue([
-        500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        NaN,
-      ])
-      const airQuality = await cityWeather.airScore()
-      expect(airQuality).toEqual(375)
+      expect(airQuality).toEqual(284)
     })
   })
 

@@ -1,5 +1,6 @@
 import { WeatherData } from './weatherData.js'
 import { AirQualityData } from './airQualityData.js'
+import { stdev } from './util.js'
 import percentile from 'percentile'
 
 export class CityWeather {
@@ -14,32 +15,18 @@ export class CityWeather {
     })
   }
 
+  async airScoreStdev () {
+    await this.airQuality.fetch()
+    const dailyMaxValues = this.airQuality.aqiDailyMax()
+    return stdev(dailyMaxValues)
+  }
+
   async airScore () {
     await this.airQuality.fetch()
-
-    // Each day is in their own sub-array
-    const dailyValues = this.airQuality.aqi().reduce((buckets, aqi) => {
-      const lastBucket = buckets[buckets.length - 1]
-      if (lastBucket.length === 24) {
-        buckets.push([aqi])
-      } else {
-        buckets[buckets.length - 1].push(aqi)
-      }
-      return buckets
-    }, [[]])
-
-    // Adds the max of each bucket and averages them
-    let ignoreDays = 0
-    const dailyAverage = dailyValues.reduce((total, dayBucket) => {
-      let dailyMax = Math.max(...dayBucket.filter(x => !isNaN(x)))
-      if (dailyMax < 0 || dailyMax > 500) {
-        dailyMax = 0
-        ignoreDays++
-      }
+    const dailyMaxValues = this.airQuality.aqiDailyMax()
+    return dailyMaxValues.reduce((total, dailyMax) => {
       return total + dailyMax
-    }, 0) / Math.max(1, dailyValues.length - ignoreDays)
-
-    return dailyAverage
+    }, 0) / Math.max(1, dailyMaxValues.length)
   }
 
   async stdevTemp () {
@@ -47,13 +34,7 @@ export class CityWeather {
     const temps = this.weather.dailyMeanTemp().filter((num) => {
       return !Number.isNaN(num)
     })
-    const avg = temps.reduce((total, temp) => {
-      return total + temp
-    }, 0) / temps.length
-    const variance = temps.reduce((acc, temp) => {
-      return acc + Math.pow(temp - avg, 2)
-    }, 0) / (temps.length - 1)
-    return Math.sqrt(variance)
+    return stdev(temps)
   }
 
   async highTemp () {

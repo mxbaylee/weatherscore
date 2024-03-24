@@ -20,6 +20,25 @@ export class AirQualityData {
     return this.hourly.variables(0).valuesArray()
   }
 
+  aqiDailyMax () {
+    // Turn them into dailiy buckets
+    const dailyValues = this.aqi().reduce((buckets, aqi) => {
+      const lastBucket = buckets[buckets.length - 1]
+      if (lastBucket.length === 24) {
+        buckets.push([aqi])
+      } else {
+        buckets[buckets.length - 1].push(aqi)
+      }
+      return buckets
+    }, [[]])
+    // Map to daily max values
+    return dailyValues.map((dayBucket) => {
+      return Math.max(...dayBucket.filter(x => !isNaN(x)))
+    }).filter((dailyMax) => {
+      return Number.isFinite(dailyMax) && !isNaN(dailyMax)
+    })
+  }
+
   async fetch() {
     if (this.hourly) {
       console.log("Air Quality data already available.")
