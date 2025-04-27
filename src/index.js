@@ -14,31 +14,37 @@ const city = new CityWeather({
 
 const airScore = await city.airScore()
 const airScoreStdev = await city.airScoreStdev()
-const avgTemp = await city.avgTemp()
-const stdevTemp = await city.stdevTemp()
-const highTemp = await city.highTemp()
-const lowTemp = await city.lowTemp()
+
+const avgMaxTemp = await city.avgMaxTemp()
+const stdevMaxTemp = await city.stdevMaxTemp()
+const avgMinTemp = await city.avgMinTemp()
+const stdevMinTemp = await city.stdevMinTemp()
+
 const overcastScore = await city.overcastScore()
 const sunshineScore = await city.sunshineScore()
 
 console.log({
-  overcastScore,
-  sunshineScore,
-  avgTemp,
-  stdevTemp,
-  highTemp,
-  lowTemp,
   airScore,
   airScoreStdev,
+
+  avgMaxTemp,
+  stdevMaxTemp,
+  avgMinTemp,
+  stdevMinTemp,
+
+  overcastScore,
+  sunshineScore,
 })
 
 pbcopy([
   airScore,
   airScoreStdev,
-  avgTemp,
-  stdevTemp,
-  highTemp,
-  lowTemp,
+
+  avgMaxTemp,
+  stdevMaxTemp,
+  avgMinTemp,
+  stdevMinTemp,
+
   overcastScore,
   sunshineScore,
 ].join('\t'))

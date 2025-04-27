@@ -1,4 +1,5 @@
 import { fetchWeatherApi } from 'openmeteo'
+import { START_DATE, END_DATE } from './constants.js'
 
 // https://open-meteo.com/en/docs/historical-weather-api/
 const apiUrl = "https://archive-api.open-meteo.com/v1/archive"
@@ -10,24 +11,28 @@ export class WeatherData {
       latitude: latitude,
       longitude: longitude,
       timezone: "auto",
-      start_date: "2014-03-04",
-      end_date: "2024-03-05",
-      daily: ["temperature_2m_mean", "daylight_duration", "sunshine_duration"],
+      start_date: START_DATE,
+      end_date: END_DATE,
+      daily: ["temperature_2m_max", "temperature_2m_min", "daylight_duration", "sunshine_duration"],
       temperature_unit: "fahrenheit",
       wind_speed_unit: "mph",
     }
   }
 
-  dailyMeanTemp() {
+  dailyMaxTemp() {
     return this.daily.variables(0).valuesArray()
   }
 
-  dailyDaylight() {
+  dailyMinTemp() {
     return this.daily.variables(1).valuesArray()
   }
 
-  dailySunshine() {
+  dailyDaylight() {
     return this.daily.variables(2).valuesArray()
+  }
+
+  dailySunshine() {
+    return this.daily.variables(3).valuesArray()
   }
 
   async fetch() {

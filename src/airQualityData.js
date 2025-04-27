@@ -1,4 +1,5 @@
 import { fetchWeatherApi } from 'openmeteo'
+import { START_DATE, END_DATE } from './constants.js'
 
 // https://open-meteo.com/en/docs/air-quality-api/
 const apiUrl = "https://air-quality-api.open-meteo.com/v1/air-quality"
@@ -11,8 +12,8 @@ export class AirQualityData {
       longitude: longitude,
       hourly: ["us_aqi"],
       timezone: "auto",
-      start_date: "2022-07-29",
-      end_date: "2024-03-05",
+      start_date: START_DATE,
+      end_date: END_DATE,
     }
   }
 

@@ -29,33 +29,35 @@ export class CityWeather {
     }, 0) / Math.max(1, dailyMaxValues.length)
   }
 
-  async stdevTemp () {
+  async stdevMaxTemp () {
     await this.weather.fetch()
-    const temps = this.weather.dailyMeanTemp().filter((num) => {
+    const temps = this.weather.dailyMaxTemp().filter((num) => {
       return !Number.isNaN(num)
     })
     return stdev(temps)
   }
 
-  async highTemp () {
+  async avgMaxTemp () {
     await this.weather.fetch()
-    const temps = this.weather.dailyMeanTemp().filter((num) => {
+    const temps = this.weather.dailyMaxTemp().filter((num) => {
       return !Number.isNaN(num)
     })
-    return percentile(90, temps)
+    return temps.reduce((total, temp) => {
+      return total + temp
+    }, 0) / temps.length
   }
 
-  async lowTemp () {
+  async stdevMinTemp () {
     await this.weather.fetch()
-    const temps = this.weather.dailyMeanTemp().filter((num) => {
+    const temps = this.weather.dailyMinTemp().filter((num) => {
       return !Number.isNaN(num)
     })
-    return percentile(10, temps)
+    return stdev(temps)
   }
 
-  async avgTemp () {
+  async avgMinTemp () {
     await this.weather.fetch()
-    const temps = this.weather.dailyMeanTemp().filter((num) => {
+    const temps = this.weather.dailyMinTemp().filter((num) => {
       return !Number.isNaN(num)
     })
     return temps.reduce((total, temp) => {

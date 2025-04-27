@@ -7,6 +7,8 @@ npm start -- {lat} {lng}
 npm start -- 45.523 -122.676
 ```
 
+Note: lat/lng can be pasted with a tab from GSheets.
+
 ```
 ▶ npm start -- 45.523 -122.676
 
@@ -45,9 +47,8 @@ Return Values: `0` to `100`, where 100 has a lot of sunshine.
 
 Has methods for giving you temperature data including:
 
-* Average Daily Temperature
-* 90th Percentile
-* 10th Percentile
+* Daily Min Temperature (Average + Stdev)
+* Daily Max Temperature (Average + Stdev)
 
 ## 🌬️ Air Quality
 
