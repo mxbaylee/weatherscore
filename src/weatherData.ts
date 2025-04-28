@@ -27,14 +27,14 @@ export class WeatherData {
     return this.daily.temperature_2m_min.pairs;
   }
 
-  dailyDaylight(): Float32Array {
+  dailyDaylight(): number[] {
     if (!this.daily) {
       throw new Error('Daily data not available. Call fetch() first.');
     }
     return this.daily.daylight_duration.values;
   }
 
-  dailySunshine(): Float32Array {
+  dailySunshine(): number[] {
     if (!this.daily) {
       throw new Error('Daily data not available. Call fetch() first.');
     }

@@ -2,6 +2,7 @@ import { fetchWeatherApi } from 'openmeteo'
 import { START_DATE, END_DATE } from './constants'
 import type { WeatherApiResponse } from '@openmeteo/sdk/weather-api-response'
 import type { VariablesWithTime } from '@openmeteo/sdk/variables-with-time'
+import { readCacheOrFetch } from './cache'
 
 export const API_URLS = {
   weather: "https://archive-api.open-meteo.com/v1/archive",
@@ -21,7 +22,7 @@ export interface TimeSeriesPairs {
 }
 
 export interface TimeSeriesData {
-  values: Float32Array;
+  values: number[];
   utcMs: number[];
   pairs: TimeSeriesPairs;
 }
@@ -62,7 +63,7 @@ export class OpenMeteoApi {
     });
 
     return valuesArrays.map((values: Float32Array) => ({
-      values,
+      values: Array.from(values),
       utcMs,
       pairs: Object.fromEntries(utcMs.map((utcMs, idx) => [utcMs, values[idx]]))
     }));
@@ -80,20 +81,25 @@ export class OpenMeteoApi {
       wind_speed_unit: "mph",
     };
 
-    const response = await this.fetchRaw(API_URLS.weather, params);
-    const daily = response.daily();
-
-    if (!daily) {
-      console.warn("No daily data available");
-      return {};
-    }
+    const cacheKey = `daily-weather_${params.latitude}_${params.longitude}_${params.start_date}_${params.end_date}`;
 
     const [
       temperature_2m_max,
       temperature_2m_min,
       daylight_duration,
       sunshine_duration
-    ] = this.buildTimeSeriesData(daily, response.utcOffsetSeconds());
+    ] = await readCacheOrFetch(cacheKey, async (): Promise<TimeSeriesData[]> => {
+      const response = await this.fetchRaw(API_URLS.weather, params);
+      const daily = response.daily();
+
+      if (!daily) {
+        console.warn("No daily data available");
+        console.warn(params);
+        return [];
+      }
+
+      return this.buildTimeSeriesData(daily, response.utcOffsetSeconds());
+    });
 
     return {
       temperature_2m_max,
@@ -113,15 +119,20 @@ export class OpenMeteoApi {
       hourly: ["us_aqi"],
     };
 
-    const response = await this.fetchRaw(API_URLS.airQuality, params);
-    const hourly = response.hourly();
+    const cacheKey = `hourly-air-quality_${params.latitude}_${params.longitude}_${params.start_date}_${params.end_date}`;
+    const [us_aqi] = await readCacheOrFetch(cacheKey, async (): Promise<TimeSeriesData[]> => {
+      const response = await this.fetchRaw(API_URLS.airQuality, params);
 
-    if (!hourly) {
-      console.warn("No hourly data available");
-      return {};
-    }
+      const hourly = response.hourly();
 
-    const [us_aqi] = this.buildTimeSeriesData(hourly, response.utcOffsetSeconds());
+      if (!hourly) {
+        console.warn("No hourly data available");
+        console.warn(params);
+        return [];
+      }
+
+      return this.buildTimeSeriesData(hourly, response.utcOffsetSeconds());
+    });
 
     return {
       us_aqi

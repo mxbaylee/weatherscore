@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import { stdev } from './util.js'
-import { vi } from 'vitest'
 
 describe('util', () => {
   describe('stdev', () => {

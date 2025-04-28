@@ -1,6 +1,4 @@
 import { HourlyResponse, OpenMeteoApi } from './openMeteoApi';
-import type { WeatherApiResponse } from '@openmeteo/sdk/weather-api-response';
-import type { VariablesWithTime } from '@openmeteo/sdk/variables-with-time';
 
 const range = (start: number, stop: number, step: number) =>
   Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
@@ -19,7 +17,7 @@ export class AirQualityData {
   }
 
   // lower is better
-  aqi (): Float32Array {
+  aqi (): number[] {
     if (!this.hourly) {
       throw new Error('Hourly data not available. Call fetch() first.');
     }

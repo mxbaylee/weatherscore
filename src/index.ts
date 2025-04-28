@@ -11,8 +11,6 @@ const city = new CityWeather({
 });
 
 const airScore = await city.airScore();
-console.log({ airScore });
-process.exit(0);
 const airScoreStdev = await city.airScoreStdev();
 
 const temperatureBuckets = await city.temperatureBuckets();
@@ -24,18 +22,36 @@ console.log({
   airScore,
   airScoreStdev,
 
-  temperatureBuckets,
-
   overcastScore,
   sunshineScore,
+
+  ...(temperatureBuckets.reduce((acc, bucket) => {
+    return {
+      ...acc,
+      [`month${bucket.monthNumber}MinAverage`]: bucket.monthMinAverage,
+      [`month${bucket.monthNumber}MinStdev`]: bucket.monthMinStdev,
+      [`month${bucket.monthNumber}MaxAverage`]: bucket.monthMaxAverage,
+      [`month${bucket.monthNumber}MaxStdev`]: bucket.monthMaxStdev,
+    }
+  }, {})),
+
 });
 
 pbcopy([
   airScore,
   airScoreStdev,
 
-  temperatureBuckets,
-
   overcastScore,
   sunshineScore,
+
+  ...Object.values(temperatureBuckets.reduce((acc, bucket) => {
+    return {
+      ...acc,
+      [`month${bucket.monthNumber}MinAverage`]: bucket.monthMinAverage,
+      [`month${bucket.monthNumber}MinStdev`]: bucket.monthMinStdev,
+      [`month${bucket.monthNumber}MaxAverage`]: bucket.monthMaxAverage,
+      [`month${bucket.monthNumber}MaxStdev`]: bucket.monthMaxStdev,
+    }
+  }, {})),
+
 ].join('\t'));
