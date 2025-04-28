@@ -1,30 +1,32 @@
-import { fetchWeatherApi } from 'openmeteo'
-import { START_DATE, END_DATE } from './constants.js'
+import { HourlyResponse, OpenMeteoApi } from './openMeteoApi';
+import type { WeatherApiResponse } from '@openmeteo/sdk/weather-api-response';
+import type { VariablesWithTime } from '@openmeteo/sdk/variables-with-time';
 
-// https://open-meteo.com/en/docs/air-quality-api/
-const apiUrl = "https://air-quality-api.open-meteo.com/v1/air-quality"
+const range = (start: number, stop: number, step: number) =>
+  Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
 
 export class AirQualityData {
-  hourly: any;
-  args: any;
+  private hourly: HourlyResponse | null;
+  private api: OpenMeteoApi;
+  private latitude: number;
+  private longitude: number;
 
   constructor ({ latitude, longitude }: { latitude: number, longitude: number }) {
     this.hourly = null;
-    this.args = {
-      latitude: latitude,
-      longitude: longitude,
-      hourly: ["us_aqi"],
-      timezone: "auto",
-      start_date: START_DATE,
-      end_date: END_DATE,
-    };
+    this.api = new OpenMeteoApi();
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 
-  aqi () {
-    return this.hourly.variables(0).valuesArray();
+  // lower is better
+  aqi (): Float32Array {
+    if (!this.hourly) {
+      throw new Error('Hourly data not available. Call fetch() first.');
+    }
+    return this.hourly.us_aqi.values;
   }
 
-  aqiDailyMax () {
+  aqiDailyMax (): number[] {
     // Turn them into dailiy buckets
     const dailyValues: number[][] = this.aqi().reduce((buckets: number[][], aqi: number) => {
       const lastBucket = buckets[buckets.length - 1];
@@ -43,15 +45,17 @@ export class AirQualityData {
     });
   }
 
-  async fetch() {
+  async fetch(): Promise<void> {
     if (this.hourly) {
       console.log("Air Quality data already available.");
       return;
     }
     console.log("Fetching Air Quality data...");
     try {
-      const responses = await fetchWeatherApi(apiUrl, this.args);
-      this.hourly = responses[0].hourly();
+      this.hourly = await this.api.fetchHourlyAirQuality({
+        latitude: this.latitude,
+        longitude: this.longitude,
+      });
       console.log("Air Quality data fetched successfully.");
     } catch (error) {
       console.error("Error fetching Air Quality data:", error);

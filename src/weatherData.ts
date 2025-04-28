@@ -1,41 +1,44 @@
-import { fetchWeatherApi } from 'openmeteo'
-import { START_DATE, END_DATE } from './constants.js'
-
-// https://open-meteo.com/en/docs/historical-weather-api/
-const apiUrl = "https://archive-api.open-meteo.com/v1/archive"
+import { OpenMeteoApi, DailyResponse, TimeSeriesPairs } from './openMeteoApi'
 
 export class WeatherData {
-  daily: any;
-  args: any;
+  private daily: DailyResponse | null;
+  private api: OpenMeteoApi;
+  private latitude: number;
+  private longitude: number;
 
   constructor ({ latitude, longitude }: { latitude: number, longitude: number }) {
     this.daily = null;
-    this.args = {
-      latitude: latitude,
-      longitude: longitude,
-      timezone: "auto",
-      start_date: START_DATE,
-      end_date: END_DATE,
-      daily: ["temperature_2m_max", "temperature_2m_min", "daylight_duration", "sunshine_duration"],
-      temperature_unit: "fahrenheit",
-      wind_speed_unit: "mph",
-    };
+    this.api = new OpenMeteoApi();
+    this.latitude = latitude;
+    this.longitude = longitude;
   }
 
-  dailyMaxTemp() {
-    return this.daily.variables(0).valuesArray();
+  dailyMaxTemp(): TimeSeriesPairs {
+    if (!this.daily) {
+      throw new Error('Daily data not available. Call fetch() first.');
+    }
+    return this.daily.temperature_2m_max.pairs;
   }
 
-  dailyMinTemp() {
-    return this.daily.variables(1).valuesArray();
+  dailyMinTemp(): TimeSeriesPairs {
+    if (!this.daily) {
+      throw new Error('Daily data not available. Call fetch() first.');
+    }
+    return this.daily.temperature_2m_min.pairs;
   }
 
-  dailyDaylight() {
-    return this.daily.variables(2).valuesArray();
+  dailyDaylight(): Float32Array {
+    if (!this.daily) {
+      throw new Error('Daily data not available. Call fetch() first.');
+    }
+    return this.daily.daylight_duration.values;
   }
 
-  dailySunshine() {
-    return this.daily.variables(3).valuesArray();
+  dailySunshine(): Float32Array {
+    if (!this.daily) {
+      throw new Error('Daily data not available. Call fetch() first.');
+    }
+    return this.daily.sunshine_duration.values;
   }
 
   async fetch() {
@@ -45,8 +48,10 @@ export class WeatherData {
     }
     console.log("Fetching weather data...");
     try {
-      const responses = await fetchWeatherApi(apiUrl, this.args);
-      this.daily = responses[0].daily();
+      this.daily = await this.api.fetchDailyWeather({
+        latitude: this.latitude,
+        longitude: this.longitude,
+      });
       console.log("Weather data fetched successfully.");
     } catch (error) {
       console.error("Error fetching weather data:", error);

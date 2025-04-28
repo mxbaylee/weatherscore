@@ -7,6 +7,10 @@ export function pbcopy (data: string): void {
 }
 
 export function stdev (items: number[]): number {
+  if (items.length === 0) {
+    return NaN;
+  }
+
   const avg = items.reduce((total: number, item: number) => {
     return total + item;
   }, 0) / items.length;
@@ -16,4 +20,10 @@ export function stdev (items: number[]): number {
   }, 0) / (items.length - 1);
 
   return Math.sqrt(variance);
+}
+
+export function average (items: number[]): number {
+  return items.reduce((total: number, item: number) => {
+    return total + item;
+  }, 0) / items.length;
 }

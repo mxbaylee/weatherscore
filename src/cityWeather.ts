@@ -1,7 +1,14 @@
 import { WeatherData } from './weatherData.js'
 import { AirQualityData } from './airQualityData.js'
-import { stdev } from './util.js'
-import percentile from 'percentile'
+import { stdev, average } from './util.js'
+
+interface TempScores {
+  monthNumber: number;
+  monthMinAverage: number;
+  monthMinStdev: number;
+  monthMaxAverage: number;
+  monthMaxStdev: number;
+}
 
 export class CityWeather {
   weather: WeatherData;
@@ -18,13 +25,13 @@ export class CityWeather {
     });
   }
 
-  async airScoreStdev () {
+  async airScoreStdev (): Promise<number> {
     await this.airQuality.fetch();
     const dailyMaxValues = this.airQuality.aqiDailyMax();
     return stdev(dailyMaxValues);
   }
 
-  async airScore () {
+  async airScore (): Promise<number> {
     await this.airQuality.fetch();
     const dailyMaxValues = this.airQuality.aqiDailyMax();
     return dailyMaxValues.reduce((total: number, dailyMax: number) => {
@@ -32,40 +39,34 @@ export class CityWeather {
     }, 0) / Math.max(1, dailyMaxValues.length);
   }
 
-  async stdevMaxTemp () {
+  async temperatureBuckets (): Promise<TempScores[]> {
     await this.weather.fetch();
-    const temps = this.weather.dailyMaxTemp().filter((num: number) => {
-      return !Number.isNaN(num);
-    })
-    return stdev(temps);
-  }
+    const maxTemps = this.weather.dailyMaxTemp();
+    const minTemps = this.weather.dailyMinTemp();
 
-  async avgMaxTemp () {
-    await this.weather.fetch();
-    const temps = this.weather.dailyMaxTemp().filter((num: number) => {
-      return !Number.isNaN(num);
-    });
-    return temps.reduce((total: number, temp: number) => {
-      return total + temp;
-    }, 0) / temps.length;
-  }
+    return Array.from({ length: 12 }, (_, month): TempScores => {
+      const minValues = Object.keys(minTemps).filter((key) => {
+        const date = new Date(Number(key));
+        return date.getUTCMonth() === month;
+      }).map((key) => {
+        return minTemps[Number(key)];
+      });
 
-  async stdevMinTemp () {
-    await this.weather.fetch();
-    const temps = this.weather.dailyMinTemp().filter((num: number) => {
-      return !Number.isNaN(num);
-    });
-    return stdev(temps);
-  }
+      const maxValues = Object.keys(maxTemps).filter((key) => {
+        const date = new Date(Number(key));
+        return date.getUTCMonth() === month;
+      }).map((key) => {
+        return minTemps[Number(key)];
+      });
 
-  async avgMinTemp () {
-    await this.weather.fetch();
-    const temps = this.weather.dailyMinTemp().filter((num: number) => {
-      return !Number.isNaN(num);
+      return {
+        monthNumber: month + 1,
+        monthMinAverage: average(minValues),
+        monthMinStdev: stdev(minValues),
+        monthMaxAverage: average(maxValues),
+        monthMaxStdev: stdev(maxValues),
+      }
     });
-    return temps.reduce((total: number, temp: number) => {
-      return total + temp;
-    }, 0) / temps.length;
   }
 
   async overcastScore() {

@@ -11,12 +11,11 @@ const city = new CityWeather({
 });
 
 const airScore = await city.airScore();
+console.log({ airScore });
+process.exit(0);
 const airScoreStdev = await city.airScoreStdev();
 
-const avgMaxTemp = await city.avgMaxTemp();
-const stdevMaxTemp = await city.stdevMaxTemp();
-const avgMinTemp = await city.avgMinTemp();
-const stdevMinTemp = await city.stdevMinTemp();
+const temperatureBuckets = await city.temperatureBuckets();
 
 const overcastScore = await city.overcastScore();
 const sunshineScore = await city.sunshineScore();
@@ -25,10 +24,7 @@ console.log({
   airScore,
   airScoreStdev,
 
-  avgMaxTemp,
-  stdevMaxTemp,
-  avgMinTemp,
-  stdevMinTemp,
+  temperatureBuckets,
 
   overcastScore,
   sunshineScore,
@@ -38,10 +34,7 @@ pbcopy([
   airScore,
   airScoreStdev,
 
-  avgMaxTemp,
-  stdevMaxTemp,
-  avgMinTemp,
-  stdevMinTemp,
+  temperatureBuckets,
 
   overcastScore,
   sunshineScore,

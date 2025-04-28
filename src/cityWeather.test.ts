@@ -19,7 +19,7 @@ describe('CityWeather', () => {
       cityWeather.airQuality.fetch = vi.fn();
       cityWeather.airQuality.aqiDailyMax = vi.fn().mockReturnValue([]);
       const airQuality = await cityWeather.airScoreStdev();
-      expect(airQuality).toBeCloseTo(0, 0);
+      expect(airQuality).toBeNaN();
     });
     it('calculates average for more values', async () => {
       const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
@@ -27,58 +27,6 @@ describe('CityWeather', () => {
       cityWeather.airQuality.aqiDailyMax = vi.fn().mockReturnValue([100, 150, 50]);
       const airQuality = await cityWeather.airScoreStdev();
       expect(airQuality).toEqual(50);
-    });
-  });
-
-  describe('dailiyMax', () => {
-    it('calculates stdev of a few temps', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
-      cityWeather.weather.fetch = vi.fn();
-      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue([15, 20, 25]);
-      const stdevTemp = await cityWeather.stdevMaxTemp();
-      expect(stdevTemp).toEqual(5);
-    });
-
-    it('calculates average temperature ignoring invalid values', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
-      cityWeather.weather.fetch = vi.fn();
-      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue([15, NaN, 20]);
-      const avgTemp = await cityWeather.avgMaxTemp();
-      expect(avgTemp).toBeCloseTo(17.5, 2);
-    });
-
-    it('calculates average temperature for a single valid value', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
-      cityWeather.weather.fetch = vi.fn();
-      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue([18]);
-      const avgTemp = await cityWeather.avgMaxTemp();
-      expect(avgTemp).toBe(18);
-    });
-  });
-
-  describe('dailyMin', () => {
-    it('calculates stdev of a few temps', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
-      cityWeather.weather.fetch = vi.fn();
-      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue([15, 20, 25]);
-      const stdevTemp = await cityWeather.stdevMinTemp();
-      expect(stdevTemp).toEqual(5);
-    });
-
-    it('calculates average temperature ignoring invalid values', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
-      cityWeather.weather.fetch = vi.fn();
-      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue([15, NaN, 20]);
-      const avgTemp = await cityWeather.avgMinTemp();
-      expect(avgTemp).toBeCloseTo(17.5, 2);
-    });
-
-    it('calculates average temperature for a single valid value', async () => {
-      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
-      cityWeather.weather.fetch = vi.fn();
-      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue([18]);
-      const avgTemp = await cityWeather.avgMinTemp();
-      expect(avgTemp).toBe(18);
     });
   });
 
@@ -156,4 +104,89 @@ describe('CityWeather', () => {
       expect(sunshineScore).toBe(0)
     })
   })
+
+  describe('temperatureBuckets', () => {
+    it('returns empty buckets for no data', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
+      cityWeather.weather.fetch = vi.fn();
+      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue({});
+      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue({});
+
+      const buckets = await cityWeather.temperatureBuckets();
+
+      expect(buckets).toHaveLength(12);
+      buckets.forEach(bucket => {
+        expect(bucket.monthMinAverage).toBe(NaN);
+        expect(bucket.monthMinStdev).toBe(NaN);
+        expect(bucket.monthMaxAverage).toBe(NaN);
+        expect(bucket.monthMaxStdev).toBe(NaN);
+      });
+    });
+
+    it('calculates correct averages and stdevs for single month', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
+      cityWeather.weather.fetch = vi.fn();
+
+      // Mock data for January (month 0)
+      const januaryTimestamps = {
+        1704067200000: 30, // Jan 1
+        1704153600000: 32, // Jan 2
+        1704240000000: 28  // Jan 3
+      };
+
+      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue(januaryTimestamps);
+      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue(januaryTimestamps);
+
+      const buckets = await cityWeather.temperatureBuckets();
+
+      // Check January (month 0)
+      expect(buckets[0].monthNumber).toBe(1);
+      expect(buckets[0].monthMinAverage).toBe(30);
+      expect(buckets[0].monthMaxAverage).toBe(30);
+
+      // Check other months are empty
+      for (let i = 1; i < 12; i++) {
+        expect(buckets[i].monthMinAverage).toBe(NaN);
+        expect(buckets[i].monthMaxAverage).toBe(NaN);
+        expect(buckets[i].monthMinStdev).toBe(NaN);
+        expect(buckets[i].monthMaxStdev).toBe(NaN);
+      }
+    });
+
+    it('handles data across multiple months', async () => {
+      const cityWeather = new CityWeather({ latitude: 10, longitude: 20 });
+      cityWeather.weather.fetch = vi.fn();
+
+      // Mock data for January and February
+      const mixedTimestamps = {
+        1704067200000: 30, // Jan 1
+        1704153600000: 32, // Jan 2
+        1706745600000: 35, // Feb 1
+        1706832000000: 33  // Feb 2
+      };
+
+      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue(mixedTimestamps);
+      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue(mixedTimestamps);
+
+      const buckets = await cityWeather.temperatureBuckets();
+
+      // Check January (month 0)
+      expect(buckets[0].monthNumber).toBe(1);
+      expect(buckets[0].monthMinAverage).toBe(31);
+      expect(buckets[0].monthMaxAverage).toBe(31);
+
+      // Check February (month 1)
+      expect(buckets[1].monthNumber).toBe(2);
+      expect(buckets[1].monthMinAverage).toBe(34);
+      expect(buckets[1].monthMaxAverage).toBe(34);
+
+      // Check other months are empty
+      for (let i = 2; i < 12; i++) {
+        expect(buckets[i].monthMinAverage).toBe(NaN);
+        expect(buckets[i].monthMaxAverage).toBe(NaN);
+        expect(buckets[i].monthMinStdev).toBe(NaN);
+        expect(buckets[i].monthMaxStdev).toBe(NaN);
+      }
+    });
+  });
 })
