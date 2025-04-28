@@ -158,27 +158,33 @@ describe('CityWeather', () => {
       cityWeather.weather.fetch = vi.fn();
 
       // Mock data for January and February
-      const mixedTimestamps = {
+      const minTimestamps = {
         1704067200000: 30, // Jan 1
         1704153600000: 32, // Jan 2
         1706745600000: 35, // Feb 1
         1706832000000: 33  // Feb 2
       };
+      const maxTimestamps = {
+        1704067200000: 36, // Jan 1
+        1704153600000: 32, // Jan 2
+        1706745600000: 37, // Feb 1
+        1706832000000: 33  // Feb 2
+      };
 
-      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue(mixedTimestamps);
-      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue(mixedTimestamps);
+      cityWeather.weather.dailyMaxTemp = vi.fn().mockReturnValue(maxTimestamps);
+      cityWeather.weather.dailyMinTemp = vi.fn().mockReturnValue(minTimestamps);
 
       const buckets = await cityWeather.temperatureBuckets();
 
       // Check January (month 0)
       expect(buckets[0].monthNumber).toBe(1);
       expect(buckets[0].monthMinAverage).toBe(31);
-      expect(buckets[0].monthMaxAverage).toBe(31);
+      expect(buckets[0].monthMaxAverage).toBe(34);
 
       // Check February (month 1)
       expect(buckets[1].monthNumber).toBe(2);
       expect(buckets[1].monthMinAverage).toBe(34);
-      expect(buckets[1].monthMaxAverage).toBe(34);
+      expect(buckets[1].monthMaxAverage).toBe(35);
 
       // Check other months are empty
       for (let i = 2; i < 12; i++) {

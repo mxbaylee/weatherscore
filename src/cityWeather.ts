@@ -56,7 +56,7 @@ export class CityWeather {
         const date = new Date(Number(key));
         return date.getUTCMonth() === month;
       }).map((key) => {
-        return minTemps[Number(key)];
+        return maxTemps[Number(key)];
       });
 
       return {

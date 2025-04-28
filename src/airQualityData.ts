@@ -1,8 +1,5 @@
 import { HourlyResponse, OpenMeteoApi } from './openMeteoApi';
 
-const range = (start: number, stop: number, step: number) =>
-  Array.from({ length: (stop - start) / step }, (_, i) => start + i * step);
-
 export class AirQualityData {
   private hourly: HourlyResponse | null;
   private api: OpenMeteoApi;
