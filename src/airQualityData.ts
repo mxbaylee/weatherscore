@@ -37,7 +37,7 @@ export class AirQualityData {
     }, [[]])
     // Map to daily max values
     return dailyValues.map((dayBucket: number[]) => {
-      return Math.max(...dayBucket.filter((x: number) => !isNaN(x)));
+      return Math.max(...dayBucket.filter((x: number) => x !== null && !isNaN(x)));
     }).filter((dailyMax: number) => {
       return Number.isFinite(dailyMax) && !isNaN(dailyMax);
     });
